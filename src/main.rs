@@ -15,6 +15,8 @@ extern crate rand;
 extern crate diesel;
 #[macro_use]
 extern crate diesel_codegen;
+extern crate r2d2;
+extern crate r2d2_diesel;
 
 use dotenv::dotenv;
 
@@ -22,10 +24,14 @@ mod schema;
 mod models;
 mod passwd;
 mod server;
+mod database;
+
+use database::ConnectionPool;
 
 fn main() {
     dotenv().ok();
     rocket::ignite()
+        .manage(ConnectionPool::new())
         .mount("/",
                routes![server::index,
                        server::dash,

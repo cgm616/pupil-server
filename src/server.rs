@@ -1,9 +1,11 @@
 use std::env;
 use std::collections::HashMap;
+use std::ops::Deref;
 
 use rocket::request;
 use rocket::response::Redirect;
 use rocket::http::{Cookie, Cookies};
+use rocket::State;
 use rocket_contrib::Template;
 
 use diesel;
@@ -11,11 +13,7 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
 use super::models::{SafeUser, Login, User, NewUser, Register, construct_token};
-
-fn establish_connection() -> PgConnection {
-    let database_url = env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url).expect(&format!("Error connecting to {}", database_url))
-}
+use super::database::ConnectionPool;
 
 #[get("/")]
 fn index() -> Template {
@@ -45,14 +43,14 @@ fn threshold() -> Template {
 }
 
 #[post("/login", data="<form>")]
-fn login(cookies: &Cookies, form: request::Form<Login>) -> Redirect {
+fn login(cookies: &Cookies, form: request::Form<Login>, pool: State<ConnectionPool>) -> Redirect {
     // TODO: validate password, get user from database, pass to `construct_token()`
     use super::schema::users;
 
-    let connection = establish_connection();
+    let connection = pool.0.get().expect("Something went wrong!"); // TODO: holy god error handling
     match users::table.filter(users::username.eq(form.get().username.clone()))
         .limit(1)
-        .load::<User>(&connection) {
+        .load::<User>(connection.deref()) {
         Ok(user) => {
             if super::passwd::verify_password(user[0].pass.as_str(), form.get().password.as_str()) {
                 cookies.add(Cookie::new("jwt", construct_token(user[0].clone())));
@@ -66,11 +64,15 @@ fn login(cookies: &Cookies, form: request::Form<Login>) -> Redirect {
 }
 
 #[post("/register", data="<form>")]
-fn register(cookies: &Cookies, form: request::Form<Register>) -> Redirect {
+fn register(cookies: &Cookies,
+            form: request::Form<Register>,
+            pool: State<ConnectionPool>)
+            -> Redirect {
     use super::schema::users;
     use super::passwd::hash_password;
 
-    let connection = establish_connection();
+    // TODO: holy god error handling
+    let connection = pool.0.get().expect("Something went wrong");
     let form = form.get(); // TODO: validation, make sure username doesn't exist
 
     let secret = env::var("HASH_SECRET").expect("HASH_SECRET not set");
@@ -87,7 +89,7 @@ fn register(cookies: &Cookies, form: request::Form<Register>) -> Redirect {
 
     let user: User = diesel::insert(&new_user)
         .into(users::table)
-        .get_result(&connection)
+        .get_result(connection.deref())
         .expect("Error saving new user");
 
     // TODO: send confirmation email
