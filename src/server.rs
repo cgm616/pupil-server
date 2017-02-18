@@ -55,7 +55,7 @@ fn login(cookies: &Cookies, form: request::Form<Login>) -> Redirect {
         .load::<User>(&connection) {
         Ok(user) => {
             if super::passwd::verify_password(user[0].pass.as_str(), form.get().password.as_str()) {
-                cookies.add(Cookie::new("jwt".into(), construct_token(user[0].clone())));
+                cookies.add(Cookie::new("jwt", construct_token(user[0].clone())));
                 Redirect::to("/dash")
             } else {
                 Redirect::to("/login")
@@ -88,7 +88,7 @@ fn register(cookies: &Cookies, form: request::Form<Register>) -> Redirect {
     let user: User = diesel::insert(&new_user)
         .into(users::table)
         .get_result(&connection)
-        .expect("Error saving new post");
+        .expect("Error saving new user");
 
     // TODO: send confirmation email
     // TODO: send better response that tells client to say something to user, error handling

@@ -76,7 +76,7 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
 
         let secret = env::var("JWT_SECRET").expect("JWT_SECRET not set"); // TODO: better errors
         let token_data =
-            match decode::<UserToken>(&cookie.value, secret.as_bytes(), Algorithm::HS256) {
+            match decode::<UserToken>(&cookie.value(), secret.as_bytes(), Algorithm::HS256) {
                 Ok(token) => token,
                 Err(e) => return Outcome::Forward(()),
             };
