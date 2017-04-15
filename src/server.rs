@@ -12,7 +12,7 @@ use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
-use super::models::{SafeUser, Login, User, NewUser, Register, construct_token};
+use super::models::{SafeUser, UserToken, Login, User, NewUser, Register};
 use super::database::ConnectionPool;
 
 #[get("/")]
@@ -53,7 +53,9 @@ fn login(cookies: &Cookies, form: request::Form<Login>, pool: State<ConnectionPo
         .load::<User>(connection.deref()) {
         Ok(user) => {
             if super::passwd::verify_password(user[0].pass.as_str(), form.get().password.as_str()) {
-                cookies.add(Cookie::new("jwt", construct_token(user[0].clone())));
+                let token = UserToken::new(user[0].clone())
+                    .construct_jwt(env::var("JWT_SECRET").expect("JWT_SECRET not set"));
+                cookies.add(Cookie::new("jwt", token));
                 Redirect::to("/dash")
             } else {
                 Redirect::to("/login")

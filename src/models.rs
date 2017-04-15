@@ -117,17 +117,20 @@ impl From<UserToken> for SafeUser {
 
 static ONE_MIN: i64 = 60;
 
-pub fn construct_token(user: User) -> String {
-    let now = time::get_time().sec;
-    let payload = UserToken {
-        iat: now,
-        exp: now + ONE_MIN,
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        username: user.username,
-    };
+impl UserToken {
+    pub fn new(user: User) -> Self {
+        let now = time::get_time().sec;
+        UserToken {
+            iat: now,
+            exp: now + ONE_MIN,
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+        }
+    }
 
-    let secret = env::var("JWT_SECRET").expect("JWT_SECRET not set");
-    encode(Header::default(), &payload, secret.as_bytes()).unwrap()
+    pub fn construct_jwt(&self, secret: String) -> String {
+        encode(Header::default(), self, secret.as_bytes()).unwrap() // TODO error handling
+    }
 }
