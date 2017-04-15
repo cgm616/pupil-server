@@ -1,6 +1,8 @@
 {
     "version": "0.1.0",
     "summary": "pupil-server",
+    "license": "",
+    "repository": "https://github.com/cgm616/pupil-server.git",
     "source-directories": [
         "src/elm"
     ],
