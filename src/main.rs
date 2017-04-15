@@ -39,6 +39,8 @@ fn main() {
                        server::threshold,
                        server::login,
                        server::register,
-                       server::logout])
+                       server::logout,
+                       server::favicon,
+                       server::file])
         .launch();
 }

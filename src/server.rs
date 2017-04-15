@@ -1,9 +1,10 @@
 use std::env;
-use std::collections::HashMap;
+use std::io;
+use std::path::{Path, PathBuf};
 use std::ops::Deref;
 
 use rocket::request;
-use rocket::response::Redirect;
+use rocket::response::{Redirect, NamedFile};
 use rocket::http::{Cookie, Cookies};
 use rocket::State;
 use rocket_contrib::Template;
@@ -16,17 +17,13 @@ use super::models::{SafeUser, UserToken, Login, User, NewUser, Register};
 use super::database::ConnectionPool;
 
 #[get("/")]
-fn index() -> Template {
-    let mut context = HashMap::new();
-    context.insert("name", "null");
-    Template::render("index", &context)
+fn index() -> io::Result<NamedFile> {
+    NamedFile::open("static/index.html")
 }
 
 #[get("/dash")]
-fn dash(user: SafeUser) -> Template {
-    let mut context = HashMap::new();
-    context.insert("username", user.username);
-    Template::render("dash", &context)
+fn dash(user: SafeUser) -> io::Result<NamedFile> {
+    NamedFile::open("static/dash.html")
 }
 
 #[get("/dash")]
@@ -36,10 +33,8 @@ fn dash_redirect(cookies: &Cookies) -> Redirect {
 }
 
 #[get("/login")]
-fn threshold() -> Template {
-    let mut context = HashMap::new();
-    context.insert("name", "null");
-    Template::render("threshold", &context)
+fn threshold() -> io::Result<NamedFile> {
+    NamedFile::open("static/login.html")
 }
 
 #[post("/login", data="<form>")]
@@ -104,4 +99,14 @@ fn register(cookies: &Cookies,
 fn logout(cookies: &Cookies) -> Redirect {
     cookies.remove("jwt");
     Redirect::to("/")
+}
+
+#[get("/favicon.ico")]
+fn favicon() -> io::Result<NamedFile> {
+    NamedFile::open("static/favicon.ico")
+}
+
+#[get("/static/<file..>")]
+fn file(file: PathBuf) -> Option<NamedFile> {
+    NamedFile::open(Path::new("./static/static/").join(file)).ok()
 }
