@@ -25,10 +25,10 @@ pub fn verify_password(hash: &str, pass: &str) -> bool {
 
 #[cfg(test)]
 mod test {
-    #[test]
-    fn password_hashing() {
-        use super::{hash_password, verify_password};
+    use super::*;
 
+    #[test]
+    fn same_pass() {
         let username = "supercoolusername";
         let password = "supersafepassword";
         let secret = "don'ttellasoul";
@@ -37,5 +37,17 @@ mod test {
         let same = verify_password(hashed.as_str(), password);
 
         assert!(same);
+    }
+
+    #[test]
+    fn diff_pass() {
+        let username = "supercoolusername";
+        let password = "supersafepassword";
+        let secret = "don'ttellasoul";
+
+        let hashed = hash_password(username, password, secret);
+        let same = verify_password(hashed.as_str(), "notthesamepassword");
+
+        assert!(!same);
     }
 }
