@@ -84,19 +84,34 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
         match token_data.claims.iat.cmp(&token_data.claims.exp) {
             Ordering::Less => {
                 match token_data.claims.exp.cmp(&time::get_time().sec) {
-                    Ordering::Less | Ordering::Equal => return Outcome::Forward(()),
-                    _ => {}
+                    Ordering::Greater => Outcome::Success(SafeUser::from(token_data.claims)),
+                    _ => Outcome::Forward(()),
                 }
             }
-            _ => return Outcome::Forward(()),
+            _ => Outcome::Forward(()),
         }
+    }
+}
 
-        Outcome::Success(SafeUser {
-            id: token_data.claims.id,
-            name: token_data.claims.name,
-            email: token_data.claims.email,
-            username: token_data.claims.username,
-        })
+impl From<User> for SafeUser {
+    fn from(user: User) -> Self {
+        SafeUser {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+        }
+    }
+}
+
+impl From<UserToken> for SafeUser {
+    fn from(user: UserToken) -> Self {
+        SafeUser {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            username: user.username,
+        }
     }
 }
 
