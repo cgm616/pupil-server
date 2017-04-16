@@ -47,11 +47,6 @@ var commonConfig = {
       template: 'src/static/dash.html',
       inject:   'body',
       filename: 'dash.html'
-    }),
-    new HtmlWebpackPlugin({
-      template: 'src/static/login.html',
-      inject:   'body',
-      filename: 'login.html'
     })
   ],
 

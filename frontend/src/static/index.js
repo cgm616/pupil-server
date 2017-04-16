@@ -3,5 +3,5 @@ require( './styles/main.scss' );
 var $ = jQuery = require( '../../node_modules/jquery/dist/jquery.js' );           // <--- remove if jQuery not needed
 
 // inject bundled Elm app into div#main
-var Elm = require( '../elm/Index' );
-Elm.Index.embed( document.getElementById( 'main' ) );
+var Elm = require( '../elm/Login' );
+Elm.Login.embed( document.getElementById( 'login' ) );
