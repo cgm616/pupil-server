@@ -7,7 +7,6 @@ use rocket::request;
 use rocket::response::{Redirect, NamedFile};
 use rocket::http::{Cookie, Cookies};
 use rocket::State;
-use rocket_contrib::Template;
 
 use diesel;
 use diesel::prelude::*;
