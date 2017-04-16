@@ -1,1 +1,9 @@
 @import "../../../node_modules/bulma/bulma";
+
+$color-main: #52A9BD;
+$color-accent1: #FF7C6B;
+$color-accent2: #FFD26B;
+
+.color-main {
+  background-color: $color-main;
+}
