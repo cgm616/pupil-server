@@ -91,103 +91,114 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    case model.currentView of
-        Choice ->
-            div [ class "field is-grouped" ]
-                [ div []
-                    [ buttonCons "Login" [ "is-primary", "is-medium" ] False (ChangeView Existing) ]
-                , div []
-                    [ buttonCons "Register" [ "is-danger", "is-medium" ] False (ChangeView Register) ]
-                ]
+    div [ class "columns" ]
+        [ div [ class "column is-half is-offset-one-quarter box has-shadow" ]
+            [ case model.currentView of
+                Choice ->
+                    viewChoice model
 
-        Existing ->
-            div []
-                [ inputCons "text" "Username" "Username" [ "field" ] UpdateUsername
-                , inputCons "password" "Password" "Password" [ "field" ] UpdatePassword
-                , div [ class "field is-grouped" ]
-                    [ buttonCons
-                        "Submit"
-                        (if model.loading then
-                            [ "is-primary", "is-loading" ]
-                         else
-                            [ "is-primary" ]
-                        )
-                        False
-                        Submit
-                    , buttonCons
-                        "Cancel"
-                        [ "is-danger" ]
-                        (if model.loading then
-                            True
-                         else
-                            False
-                        )
-                        Cancel
-                    ]
-                ]
+                Existing ->
+                    viewExisting model
 
-        Register ->
-            div []
-                [ inputCons "text" "Full Name" "Full Name" [ "field" ] UpdateName
-                , div [ class "field is-grouped" ]
-                    [ p [ class "control is-expanded" ]
-                        [ label [ class "label" ] [ text "Email" ]
-                        , input [ class "input", type_ "text", placeholder "Email", onInput UpdateEmail ] []
-                        ]
-                    , p [ class "control is-expanded" ]
-                        [ label [ class "label" ] [ text "Username" ]
-                        , input [ class "input", type_ "text", placeholder "Email", onInput UpdateUsername ] []
-                        ]
-                    ]
-                , div [ class "field is-grouped" ]
-                    [ p [ class "control is-expanded" ]
-                        [ label [ class "label" ] [ text "Password" ]
-                        , input [ class "input", type_ "password", placeholder "Password", onInput UpdatePassword ] []
-                        ]
-                    , p [ class "control is-expanded" ]
-                        [ label [ class "label" ] [ text "Verify Password" ]
-                        , input [ class "input", type_ "password", placeholder "Verify Password", onInput UpdateVerifyPassword ] []
-                        ]
-                    ]
-                , div [ class "field is-grouped" ]
-                    [ buttonCons
-                        "Submit"
-                        (if model.loading then
-                            [ "is-primary", "is-loading" ]
-                         else
-                            [ "is-primary" ]
-                        )
-                        False
-                        Submit
-                    , buttonCons
-                        "Cancel"
-                        [ "is-danger" ]
-                        (if model.loading then
-                            True
-                         else
-                            False
-                        )
-                        Cancel
-                    ]
-                ]
+                Register ->
+                    viewRegister model
 
-        LoggedIn ->
-            div [] []
+                LoggedIn ->
+                    viewLoggedIn model
+            ]
+        ]
+
+
+viewChoice model =
+    div [ class "has-text-centered" ]
+        [ p [ class "title" ] [ text "Register to get started" ]
+        , p [ class "subtitle" ] [ text "Login if you already have an account" ]
+        , div [ class "field is-grouped animate-fade-in", style [ ( "margin-bottom", "0" ) ] ]
+            [ buttonCons "Login" [ "is-primary", "is-medium", "is-fullwidth" ] False (ChangeView Existing)
+            , buttonCons "Register" [ "is-danger", "is-medium", "is-fullwidth" ] False (ChangeView Register)
+            ]
+        ]
+
+
+viewExisting model =
+    div [ class "animate-fade-in" ]
+        [ div [ class "field" ]
+            [ inputCons "text" "Username" "Username" [] UpdateUsername ]
+        , div [ class "field" ]
+            [ inputCons "password" "Password" "Password" [] UpdatePassword ]
+        , div [ class "field is-grouped" ]
+            [ buttonCons
+                "Submit"
+                (if model.loading then
+                    [ "is-primary", "is-loading", "is-fullwidth" ]
+                 else
+                    [ "is-primary", "is-fullwidth" ]
+                )
+                False
+                Submit
+            , buttonCons
+                "Cancel"
+                [ "is-danger", "is-fullwidth" ]
+                (if model.loading then
+                    True
+                 else
+                    False
+                )
+                Cancel
+            ]
+        ]
+
+
+viewRegister model =
+    div [ class "animate-fade-in" ]
+        [ div [ class "field" ]
+            [ inputCons "text" "Full Name" "Full Name" [] UpdateName ]
+        , div [ class "field is-grouped" ]
+            [ inputCons "text" "Email" "Email" [ "is-expanded" ] UpdateEmail
+            , inputCons "text" "Username" "Username" [ "is-expanded" ] UpdateUsername
+            ]
+        , div [ class "field is-grouped" ]
+            [ inputCons "password" "Password" "Password" [ "is-expanded" ] UpdatePassword
+            , inputCons "password" "Verify Password" "Verify Password" [ "is-expanded" ] UpdateVerifyPassword
+            ]
+        , div [ class "field is-grouped" ]
+            [ buttonCons
+                "Submit"
+                (if model.loading then
+                    [ "is-primary", "is-loading", "is-fullwidth" ]
+                 else
+                    [ "is-primary", "is-fullwidth" ]
+                )
+                False
+                Submit
+            , buttonCons
+                "Cancel"
+                [ "is-danger", "is-fullwidth" ]
+                (if model.loading then
+                    True
+                 else
+                    False
+                )
+                Cancel
+            ]
+        ]
+
+
+viewLoggedIn model =
+    div [ class "animate-fade-in" ] []
 
 
 inputCons : String -> String -> String -> List String -> (String -> Msg) -> Html Msg
 inputCons kind_ name placeholder_ class_ msg =
-    div [ class (String.join " " class_) ]
-        [ p [ class "control" ]
-            [ label [ class "label" ] [ text name ]
-            , input [ class "input", type_ kind_, placeholder placeholder_, onInput msg ] []
-            ]
+    p [ class ((String.join " " class_) ++ " control") ]
+        [ label [ class "label" ] [ text name ]
+        , input [ class "input", type_ kind_, placeholder placeholder_, onInput msg ] []
         ]
 
 
 buttonCons : String -> List String -> Bool -> Msg -> Html Msg
 buttonCons text_ class_ disabled_ msg =
-    p [ class "control" ]
+    p [ class "control is-expanded" ]
         [ button [ class ((String.join " " class_) ++ " button"), onClick msg, disabled disabled_ ]
             [ text text_ ]
         ]

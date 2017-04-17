@@ -20,3 +20,25 @@ $color-accent2: #FFD26B;
   background-color: $grey-dark;
   color: $white
 }
+
+.animate-fade-in > * {
+  -webkit-animation: fade 0.75s;
+  animation: fade 0.75s;
+}
+
+@-webkit-keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes fade {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
