@@ -1,9 +1,22 @@
 @import "../../../node_modules/bulma/bulma";
 
-$color-main: #52A9BD;
+$color-main: hsl(0, 0%, 48%) !default;
 $color-accent1: #FF7C6B;
 $color-accent2: #FFD26B;
 
-.color-main {
-  background-color: $color-main;
+.color-grey {
+  background-color: $grey;
+}
+
+.color-red {
+  background-color: $red;
+}
+
+.color-orange {
+  background-color: $orange;
+}
+
+.color-greydark {
+  background-color: $grey-dark;
+  color: $white
 }
