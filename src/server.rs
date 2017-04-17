@@ -31,11 +31,6 @@ fn dash_redirect(cookies: &Cookies) -> Redirect {
     Redirect::to("/login")
 }
 
-#[get("/login")]
-fn threshold() -> io::Result<NamedFile> {
-    NamedFile::open("static/login.html")
-}
-
 #[post("/login", data="<form>")]
 fn login(cookies: &Cookies, form: request::Form<Login>, pool: State<ConnectionPool>) -> Redirect {
     // TODO: validate password, get user from database, pass to `construct_token()`
