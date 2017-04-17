@@ -110,9 +110,13 @@ view model =
 
 
 viewChoice model =
-    div [ class "field is-grouped animate-fade-in", style [ ( "margin-bottom", "0" ) ] ]
-        [ buttonCons "Login" [ "is-primary", "is-medium", "is-fullwidth" ] False (ChangeView Existing)
-        , buttonCons "Register" [ "is-danger", "is-medium", "is-fullwidth" ] False (ChangeView Register)
+    div [ class "has-text-centered" ]
+        [ p [ class "title" ] [ text "Register to get started" ]
+        , p [ class "subtitle" ] [ text "Login if you already have an account" ]
+        , div [ class "field is-grouped animate-fade-in", style [ ( "margin-bottom", "0" ) ] ]
+            [ buttonCons "Login" [ "is-primary", "is-medium", "is-fullwidth" ] False (ChangeView Existing)
+            , buttonCons "Register" [ "is-danger", "is-medium", "is-fullwidth" ] False (ChangeView Register)
+            ]
         ]
 
 
