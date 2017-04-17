@@ -36,7 +36,6 @@ fn main() {
                routes![server::index,
                        server::dash,
                        server::dash_redirect,
-                       server::threshold,
                        server::login,
                        server::register,
                        server::logout,
