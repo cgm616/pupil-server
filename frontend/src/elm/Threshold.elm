@@ -3,7 +3,11 @@ module Threshold exposing (..)
 import Html exposing (Html, button, div, text, p, input, label)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
+import Http
+import Json.Decode
+import Json.Encode
 import String
+import Navigation
 
 
 main =
@@ -33,9 +37,14 @@ type ViewOption
     | LoggedIn
 
 
+empty : Model
+empty =
+    Model Choice "" "" "" "" "" Nothing False
+
+
 init : ( Model, Cmd Msg )
 init =
-    ( Model Choice "" "" "" "" "" Nothing False, Cmd.none )
+    ( empty, Cmd.none )
 
 
 
@@ -64,10 +73,45 @@ update msg model =
             ( { model | name = newName }, Cmd.none )
 
         Submit ->
-            ( { model | loading = True }, Cmd.none )
+            ( { model | loading = True }
+            , (case model.currentView of
+                Existing ->
+                    submitLogin model
 
-        Response newNotice ->
-            ( { model | notice = Just newNotice }, Cmd.none )
+                Register ->
+                    submitRegister model
+
+                _ ->
+                    Cmd.none
+              )
+            )
+
+        Response (Ok response) ->
+            ( model, Navigation.load response )
+
+        Response (Err error) ->
+            ( { empty
+                | currentView = model.currentView
+                , notice =
+                    (case error of
+                        Http.BadUrl url ->
+                            Just "For some reason the request failed. Please relead and try again."
+
+                        Http.Timeout ->
+                            Just "The server is currently overloaded, please try again later."
+
+                        Http.NetworkError ->
+                            Just "Check network connection."
+
+                        Http.BadStatus response ->
+                            Just response.body
+
+                        Http.BadPayload string response ->
+                            Just "Server response was unexpected. Please try again later."
+                    )
+              }
+            , Cmd.none
+            )
 
         Cancel ->
             init
@@ -82,7 +126,7 @@ type Msg
     | UpdateName String
     | Submit
     | Cancel
-    | Response String
+    | Response (Result Http.Error String)
 
 
 
@@ -146,6 +190,14 @@ viewExisting model =
                 )
                 Cancel
             ]
+        , (case model.notice of
+            Nothing ->
+                div [] []
+
+            Just message ->
+                div [ class "notification is-warning" ]
+                    [ text message ]
+          )
         ]
 
 
@@ -181,6 +233,14 @@ viewRegister model =
                 )
                 Cancel
             ]
+        , (case model.notice of
+            Nothing ->
+                div [] []
+
+            Just message ->
+                div [ class "notification is-warning" ]
+                    [ text message ]
+          )
         ]
 
 
@@ -211,3 +271,47 @@ buttonCons text_ class_ disabled_ msg =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.none
+
+
+
+-- HTTP
+
+
+submitLogin model =
+    Http.send
+        Response
+        (Http.post
+            "/login"
+            (encodeLogin model.username model.password)
+            (Json.Decode.string)
+        )
+
+
+encodeLogin username password =
+    Http.jsonBody
+        (Json.Encode.object
+            [ ( "username", Json.Encode.string username )
+            , ( "password", Json.Encode.string password )
+            ]
+        )
+
+
+submitRegister model =
+    Http.send
+        Response
+        (Http.post
+            "/register"
+            (encodeRegister model.name model.email model.username model.password)
+            (Json.Decode.string)
+        )
+
+
+encodeRegister name email username password =
+    Http.jsonBody
+        (Json.Encode.object
+            [ ( "name", Json.Encode.string name )
+            , ( "email", Json.Encode.string email )
+            , ( "username", Json.Encode.string username )
+            , ( "password", Json.Encode.string password )
+            ]
+        )
