@@ -6,6 +6,9 @@
 extern crate dotenv;
 extern crate rocket_contrib;
 extern crate rocket;
+extern crate serde_json;
+#[macro_use]
+extern crate serde_derive;
 extern crate jsonwebtoken as jwt;
 extern crate rustc_serialize;
 extern crate time;
@@ -21,10 +24,11 @@ extern crate r2d2_diesel;
 use dotenv::dotenv;
 
 mod schema;
-mod models;
+mod model;
 mod passwd;
 mod server;
 mod database;
+mod error;
 
 use database::ConnectionPool;
 

@@ -10,6 +10,9 @@ rocket_codegen = "0.2.0"
 rocket_contrib = "0.2.0"
 jsonwebtoken = { git = "https://github.com/Keats/rust-jwt" }
 rustc-serialize = "0.3"
+serde = "0.9"
+serde_json = "0.9"
+serde_derive = "0.9"
 diesel = "0.11.1"
 diesel_codegen = { version = "0.11.0", features = ["postgres"] }
 dotenv = "0.8.0"

@@ -1,3 +1,18 @@
+use std::env;
+use std::fmt;
+use std::io;
+use std::cmp::Ordering;
+
+use rocket::request;
+use rocket::outcome::Outcome;
+use rocket::Request;
+use rocket::http::{Cookie, Cookies};
+
+use jwt::{encode, decode, Header, Algorithm};
+use jwt::errors::Error;
+
+use time;
+
 #[derive(Queryable)]
 #[derive(Clone)]
 pub struct User {
@@ -16,16 +31,6 @@ pub struct SafeUser {
     pub username: String,
 }
 
-#[derive(Debug, RustcEncodable, RustcDecodable)]
-pub struct UserToken {
-    pub iat: i64,
-    pub exp: i64,
-    pub id: i32,
-    pub name: String,
-    pub email: String,
-    pub username: String,
-}
-
 use super::schema::users;
 
 #[derive(Insertable)]
@@ -37,32 +42,19 @@ pub struct NewUser<'a> {
     pub pass: &'a str,
 }
 
-#[derive(FromForm)]
+#[derive(Serialize, Deserialize)]
 pub struct Login {
     pub username: String,
     pub password: String,
 }
 
-#[derive(FromForm)]
+#[derive(Serialize, Deserialize)]
 pub struct Register {
     pub name: String,
     pub email: String,
     pub username: String,
     pub password: String,
 }
-
-use std::env;
-use std::cmp::Ordering;
-
-use rocket::request;
-use rocket::outcome::Outcome;
-use rocket::Request;
-use rocket::http::{Cookie, Cookies};
-
-use jwt::{encode, decode, Header, Algorithm};
-use jwt::errors::Error;
-
-use time;
 
 impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
     type Error = ();
@@ -113,6 +105,16 @@ impl From<UserToken> for SafeUser {
             username: user.username,
         }
     }
+}
+
+#[derive(Debug, RustcEncodable, RustcDecodable)]
+pub struct UserToken {
+    pub iat: i64,
+    pub exp: i64,
+    pub id: i32,
+    pub name: String,
+    pub email: String,
+    pub username: String,
 }
 
 static ONE_MIN: i64 = 60;

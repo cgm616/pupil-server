@@ -7,12 +7,15 @@ use rocket::request;
 use rocket::response::{Redirect, NamedFile};
 use rocket::http::{Cookie, Cookies};
 use rocket::State;
+use rocket_contrib::{JSON, Value};
 
 use diesel;
 use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
-use super::models::{SafeUser, UserToken, Login, User, NewUser, Register};
+use super::model::{SafeUser, UserToken, Login, User, NewUser, Register};
+use super::error::Error;
+use super::passwd;
 use super::database::ConnectionPool;
 
 #[get("/")]
@@ -31,62 +34,71 @@ fn dash_redirect(cookies: &Cookies) -> Redirect {
     Redirect::to("/login")
 }
 
-#[post("/login", data="<form>")]
-fn login(cookies: &Cookies, form: request::Form<Login>, pool: State<ConnectionPool>) -> Redirect {
-    // TODO: validate password, get user from database, pass to `construct_token()`
+#[post("/login", format = "application/json", data = "<data>")]
+fn login(cookies: &Cookies,
+         data: JSON<Login>,
+         pool: State<ConnectionPool>)
+         -> Result<JSON<String>, Error> {
     use super::schema::users;
 
-    let connection = pool.0.get().expect("Something went wrong!"); // TODO: holy god error handling
-    match users::table.filter(users::username.eq(form.get().username.clone()))
-        .limit(1)
-        .load::<User>(connection.deref()) {
-        Ok(user) => {
-            if super::passwd::verify_password(user[0].pass.as_str(), form.get().password.as_str()) {
-                let token = UserToken::new(user[0].clone())
-                    .construct_jwt(env::var("JWT_SECRET").expect("JWT_SECRET not set"));
-                cookies.add(Cookie::new("jwt", token));
-                Redirect::to("/dash")
-            } else {
-                Redirect::to("/login")
-            }
-        }
-        Err(e) => return Redirect::to("/login"), // TODO: handle errors for real
+    let data = data.into_inner();
+
+    let connection = pool.0.get()?;
+
+    let user: User = users::table.filter(users::username.eq(&data.username))
+        .first::<User>(connection.deref())?;
+
+    if passwd::verify_password(user.pass.as_str(), data.password.as_str()) {
+        let token = UserToken::new(user.clone())
+            .construct_jwt(env::var("JWT_SECRET").expect("JWT_SECRET not set"));
+        cookies.add(Cookie::new("jwt", token));
+        Ok(JSON(String::from("dash")))
+    } else {
+        Err(Error::BadUserOrPass)
     }
+
+    // TODO make these errors the right errors
 }
 
-#[post("/register", data="<form>")]
+#[post("/register", format = "application/json", data = "<data>")]
 fn register(cookies: &Cookies,
-            form: request::Form<Register>,
+            data: JSON<Register>,
             pool: State<ConnectionPool>)
-            -> Redirect {
+            -> Result<JSON<String>, Error> {
     use super::schema::users;
-    use super::passwd::hash_password;
 
-    // TODO: holy god error handling
-    let connection = pool.0.get().expect("Something went wrong");
-    let form = form.get(); // TODO: validation, make sure username doesn't exist
+    let connection = pool.0.get()?;
+    let data = data.into_inner(); // TODO: validation, make sure username and email doesn't exist
+
+    /*
+    match users::table.filter(users::username.eq(&data.username))
+        .count()
+        .get_result(connection.deref()) {
+        Ok(0) => {}
+        Ok(_) => return Err(RegisterError::UserTaken),
+        Err(e) => return Err(RegisterError::ServerError),
+    }
+    */
 
     let secret = env::var("HASH_SECRET").expect("HASH_SECRET not set");
-    let secure_pass = hash_password(form.username.as_str(),
-                                    form.password.as_str(),
-                                    secret.as_str()); // TODO: hash password
+    let secure_pass = passwd::hash_password(data.username.as_str(),
+                                            data.password.as_str(),
+                                            secret.as_str());
 
     let new_user = NewUser {
-        name: form.name.as_str(),
-        email: form.email.as_str(),
-        username: form.username.as_str(),
+        name: data.name.as_str(),
+        email: data.email.as_str(),
+        username: data.username.as_str(),
         pass: secure_pass.as_str(),
     };
 
-    let user: User = diesel::insert(&new_user)
-        .into(users::table)
-        .get_result(connection.deref())
-        .expect("Error saving new user");
+    diesel::insert(&new_user).into(users::table)
+        .execute(connection.deref())?;
+
+    Ok(JSON(String::from("dash")))
 
     // TODO: send confirmation email
-    // TODO: send better response that tells client to say something to user, error handling
-
-    Redirect::to("/login")
+    // TODO make these errors the right errors
 }
 
 #[get("/logout")]
