@@ -167,9 +167,9 @@ viewChoice model =
 viewExisting model =
     div [ class "animate-fade-in" ]
         [ div [ class "field" ]
-            [ inputCons "text" "Username" "Username" [] UpdateUsername ]
+            [ inputCons "text" "Username" "Username" [] model.loading model.username UpdateUsername ]
         , div [ class "field" ]
-            [ inputCons "password" "Password" "Password" [] UpdatePassword ]
+            [ inputCons "password" "Password" "Password" [] model.loading model.password UpdatePassword ]
         , div [ class "field is-grouped" ]
             [ buttonCons
                 "Submit"
@@ -180,15 +180,7 @@ viewExisting model =
                 )
                 False
                 Submit
-            , buttonCons
-                "Cancel"
-                [ "is-danger", "is-fullwidth" ]
-                (if model.loading then
-                    True
-                 else
-                    False
-                )
-                Cancel
+            , buttonCons "Cancel" [ "is-danger", "is-fullwidth" ] model.loading Cancel
             ]
         , (case model.notice of
             Nothing ->
@@ -204,14 +196,14 @@ viewExisting model =
 viewRegister model =
     div [ class "animate-fade-in" ]
         [ div [ class "field" ]
-            [ inputCons "text" "Full Name" "Full Name" [] UpdateName ]
+            [ inputCons "text" "Full Name" "Full Name" [] model.loading model.name UpdateName ]
         , div [ class "field is-grouped" ]
-            [ inputCons "text" "Email" "Email" [ "is-expanded" ] UpdateEmail
-            , inputCons "text" "Username" "Username" [ "is-expanded" ] UpdateUsername
+            [ inputCons "text" "Email" "Email" [ "is-expanded" ] model.loading model.email UpdateEmail
+            , inputCons "text" "Username" "Username" [ "is-expanded" ] model.loading model.username UpdateUsername
             ]
         , div [ class "field is-grouped" ]
-            [ inputCons "password" "Password" "Password" [ "is-expanded" ] UpdatePassword
-            , inputCons "password" "Verify Password" "Verify Password" [ "is-expanded" ] UpdateVerifyPassword
+            [ inputCons "password" "Password" "Password" [ "is-expanded" ] model.loading model.password UpdatePassword
+            , inputCons "password" "Verify Password" "Verify Password" [ "is-expanded" ] model.loading model.verifyPassword UpdateVerifyPassword
             ]
         , div [ class "field is-grouped" ]
             [ buttonCons
@@ -223,15 +215,7 @@ viewRegister model =
                 )
                 False
                 Submit
-            , buttonCons
-                "Cancel"
-                [ "is-danger", "is-fullwidth" ]
-                (if model.loading then
-                    True
-                 else
-                    False
-                )
-                Cancel
+            , buttonCons "Cancel" [ "is-danger", "is-fullwidth" ] model.loading Cancel
             ]
         , (case model.notice of
             Nothing ->
@@ -248,11 +232,11 @@ viewLoggedIn model =
     div [ class "animate-fade-in" ] []
 
 
-inputCons : String -> String -> String -> List String -> (String -> Msg) -> Html Msg
-inputCons kind_ name placeholder_ class_ msg =
+inputCons : String -> String -> String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
+inputCons kind_ name placeholder_ class_ disabled_ value_ msg =
     p [ class ((String.join " " class_) ++ " control") ]
         [ label [ class "label" ] [ text name ]
-        , input [ class "input", type_ kind_, placeholder placeholder_, onInput msg ] []
+        , input [ class "input", type_ kind_, placeholder placeholder_, onInput msg, disabled disabled_, value value_ ] []
         ]
 
 
