@@ -5,3 +5,10 @@ rust:
   - nightly
 git:
   depth: 5
+branches:
+  only:
+  - master
+notifications:
+  email:
+    on_success: change
+    on_failure: change
