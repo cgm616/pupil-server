@@ -31,7 +31,8 @@ type alias Model =
 
 
 type ViewOption
-    = Choice
+    = Button
+    | Choice
     | Existing
     | Register
     | LoggedIn
@@ -39,7 +40,7 @@ type ViewOption
 
 empty : Model
 empty =
-    Model Choice "" "" "" "" "" Nothing False
+    Model Button "" "" "" "" "" Nothing False
 
 
 init : ( Model, Cmd Msg )
@@ -114,7 +115,7 @@ update msg model =
             )
 
         Cancel ->
-            init
+            ( { empty | currentView = Choice }, Cmd.none )
 
 
 type Msg
@@ -135,28 +136,43 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "columns" ]
-        [ div [ class "column is-half is-offset-one-quarter box has-shadow" ]
-            [ case model.currentView of
-                Choice ->
-                    viewChoice model
+    case model.currentView of
+        Button ->
+            viewButton model
 
-                Existing ->
-                    viewExisting model
+        Choice ->
+            div []
+                [ viewButton model
+                , viewModal (viewChoice model) model
+                ]
 
-                Register ->
-                    viewRegister model
+        Existing ->
+            div []
+                [ viewButton model
+                , viewModal (viewExisting model) model
+                ]
 
-                LoggedIn ->
-                    viewLoggedIn model
-            ]
+        Register ->
+            div []
+                [ viewButton model
+                , viewModal (viewRegister model) model
+                ]
+
+        LoggedIn ->
+            viewLoggedIn model
+
+
+viewButton model =
+    div [ class "field is-grouped", style [ ( "margin-bottom", "0" ) ] ]
+        [ buttonCons "Login" [ "is-warning" ] False (ChangeView Existing)
+        , buttonCons "Get Started" [ "is-primary" ] False (ChangeView Choice)
         ]
 
 
 viewChoice model =
-    div [ class "has-text-centered" ]
-        [ p [ class "title" ] [ text "Register to get started" ]
-        , p [ class "subtitle" ] [ text "Login if you already have an account" ]
+    div [ class "has-text-centered animate-fade-in" ]
+        [ p [ class "title", style [ ( "color", "#4a4a4a" ) ] ] [ text "Register to get started" ]
+        , p [ class "subtitle", style [ ( "color", "#4a4a4a" ) ] ] [ text "Login if you already have an account" ]
         , div [ class "field is-grouped animate-fade-in", style [ ( "margin-bottom", "0" ) ] ]
             [ buttonCons "Login" [ "is-primary", "is-medium", "is-fullwidth" ] False (ChangeView Existing)
             , buttonCons "Register" [ "is-danger", "is-medium", "is-fullwidth" ] False (ChangeView Register)
@@ -229,7 +245,16 @@ viewRegister model =
 
 
 viewLoggedIn model =
-    div [ class "animate-fade-in" ] []
+    div [] []
+
+
+viewModal function model =
+    div [ class "modal is-active" ]
+        [ div [ class "modal-background", onClick (ChangeView Button) ] []
+        , div [ class "modal-content" ]
+            [ div [ class "box" ] [ function ] ]
+        , div [ class "modal-close", onClick (ChangeView Button) ] []
+        ]
 
 
 inputCons : String -> String -> String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
