@@ -14,6 +14,7 @@ pub enum Error {
     UserTaken,
     EmailTaken,
     BadUserOrPass,
+    BadCookie,
     NotConfirmed(ThresholdKind),
     DatabaseError(DieselError),
     PoolError(GetTimeout),
@@ -34,9 +35,10 @@ impl fmt::Display for Error {
 impl error::Error for Error {
     fn description(&self) -> &str {
         match *self {
-            Error::BadUserOrPass => "Username and password don't match.",
             Error::UserTaken => "That username already exists. Please choose another.",
             Error::EmailTaken => "An account with that email already exists.",
+            Error::BadUserOrPass => "Username and password don't match.",
+            Error::BadCookie => "Your authentication cookie has expired.",
             Error::NotConfirmed(ref kind) => {
                 match *kind {
                     ThresholdKind::Register => {
