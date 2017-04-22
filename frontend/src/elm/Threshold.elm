@@ -1,6 +1,6 @@
 module Threshold exposing (..)
 
-import Html exposing (Html, button, div, text, p, input, label)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
@@ -136,6 +136,47 @@ type Msg
 
 view : Model -> Html Msg
 view model =
+    section [ class "hero is-fullheight is-info" ]
+        [ div [ class "hero-head" ]
+            [ div [ class "container" ]
+                [ nav [ class "nav" ]
+                    [ div [ class "nav-left" ]
+                        [ a [ class "nav-item" ] [ img [ src "/static/img/logo.png" ] [] ] ]
+                    , span [ class "nav-toggle" ] []
+                    , div [ class "nav-right nav-menu" ]
+                        [ a [ class "nav-item", href "#what" ] [ text "What" ]
+                        , a [ class "nav-item", href "#why" ] [ text "Why" ]
+                        , a [ class "nav-item", href "#how" ] [ text "How" ]
+                        , a [ class "nav-item", href "#about" ] [ text "About" ]
+                        , div [ class "nav-item" ] [ viewSplit model ]
+                        ]
+                    ]
+                ]
+            ]
+        , div [ class "hero-body has-text-centered" ]
+            [ div [ class "container" ]
+                [ h1 [ class "title is-2" ]
+                    [ text "Learn with "
+                    , strong [] [ text "Pupil" ]
+                    ]
+                , h3 [ class "title is-2" ]
+                    [ strong [] [ text "Peer tutoring " ]
+                    , text "built to be accessable and useful for "
+                    , strong [] [ text "all" ]
+                    , text "."
+                    ]
+                ]
+            ]
+        , div [ class "hero-foot has-text-centered" ]
+            [ div [ class "container" ]
+                [ span [ id "point-down" ] []
+                , h5 [ class "title is-5" ] [ text "Scroll down" ]
+                ]
+            ]
+        ]
+
+
+viewSplit model =
     case model.currentView of
         Button ->
             viewButton model
