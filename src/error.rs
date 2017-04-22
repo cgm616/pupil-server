@@ -2,6 +2,7 @@ use std::{io, fmt, error};
 use std::error::Error as StdError;
 
 use diesel::result::Error as DieselError;
+use diesel::result::{DatabaseErrorKind, DatabaseErrorInformation};
 
 use rocket::response::{Responder, Response};
 use rocket::http::{ContentType, Status};
@@ -51,7 +52,20 @@ impl<'a> Responder<'a> for Error {
 
 impl From<DieselError> for Error {
     fn from(err: DieselError) -> Self {
-        Error::DatabaseError(err)
+        match err {
+            DieselError::NotFound => Error::BadUserOrPass,
+            DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, info) => {
+                match info.constraint_name() {
+                    Some("users_email_key") => Error::EmailTaken,
+                    Some("users_username_key") => Error::UserTaken,
+                    _ => {
+                        Error::DatabaseError(DieselError::DatabaseError(
+                            DatabaseErrorKind::UniqueViolation, info))
+                    }
+                }
+            }
+            _ => Error::DatabaseError(err),
+        }
     }
 }
 
