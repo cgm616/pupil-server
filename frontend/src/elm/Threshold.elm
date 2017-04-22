@@ -175,82 +175,18 @@ view model =
                     ]
                 ]
             ]
-        , section
-            [ class "hero is-medium is-dark" ]
-            [ div [ class "hero-head" ] [ a [ name "what" ] [] ]
-            , div [ class "hero-body" ]
-                [ div [ class "container" ]
-                    [ div [ class "columns" ]
-                        [ div [ class "column is-6" ]
-                            [ h3 [ class "title" ]
-                                [ text "What is Pupil?" ]
-                            , hr [] []
-                            , p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ]
-                            ]
-                        , div [ class "box column is-5 is-offset-1" ]
-                            [ figure [ class "image is-16by9" ]
-                                [ img [ src "http://placehold.it/640x360" ] [] ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        , section
-            [ class "hero is-medium is-info" ]
-            [ div [ class "hero-head" ] [ a [ name "why" ] [] ]
-            , div [ class "hero-body" ]
-                [ div [ class "container" ]
-                    [ div [ class "columns" ]
-                        [ div [ class "box column is-5" ]
-                            [ figure [ class "image is-16by9" ] [ img [ src "http://placehold.it/640x360" ] [] ] ]
-                        , div [ class "column is-6 is-offset-1" ]
-                            [ h3 [ class "title" ]
-                                [ text "Why use Pupil?" ]
-                            , hr [] []
-                            , p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        , section
-            [ class "hero is-medium is-dark" ]
-            [ div [ class "hero-head" ] [ a [ name "how" ] [] ]
-            , div [ class "hero-body" ]
-                [ div [ class "container" ]
-                    [ div [ class "columns" ]
-                        [ div [ class "column is-6" ]
-                            [ h3 [ class "title" ]
-                                [ text "How does Pupil work?" ]
-                            , hr [] []
-                            , p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ]
-                            ]
-                        , div [ class "box column is-5 is-offset-1" ]
-                            [ figure [ class "image is-16by9" ]
-                                [ img [ src "http://placehold.it/640x360" ] [] ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        , section
-            [ class "hero is-medium is-info" ]
-            [ div [ class "hero-head" ] [ a [ name "about" ] [] ]
-            , div [ class "hero-body" ]
-                [ div [ class "container" ]
-                    [ div [ class "columns" ]
-                        [ div [ class "box column is-5" ]
-                            [ figure [ class "image is-16by9" ] [ img [ src "http://placehold.it/640x360" ] [] ] ]
-                        , div [ class "column is-6 is-offset-1" ]
-                            [ h3 [ class "title" ]
-                                [ text "Who built Pupil" ]
-                            , hr [] []
-                            , p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+        , viewSection Left
+            "What is Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Right
+            "Why use Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Left
+            "How does Pupil work?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Right
+            "Who built Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
         ]
 
 
@@ -374,6 +310,56 @@ viewModal function model =
             [ div [ class "box" ] [ function ] ]
         , div [ class "modal-close", onClick (ChangeView Button) ] []
         ]
+
+
+type Side
+    = Left
+    | Right
+
+
+viewSection contentSide title_ content_ =
+    case contentSide of
+        Left ->
+            section
+                [ class "hero is-medium is-dark" ]
+                [ div [ class "hero-head" ] [ a [ name "how" ] [] ]
+                , div [ class "hero-body" ]
+                    [ div [ class "container" ]
+                        [ div [ class "columns" ]
+                            [ div [ class "column is-6" ]
+                                [ h3 [ class "title" ]
+                                    [ text title_ ]
+                                , hr [] []
+                                , content_
+                                ]
+                            , div [ class "box column is-5 is-offset-1" ]
+                                [ figure [ class "image is-16by9" ]
+                                    [ img [ src "http://placehold.it/640x360" ] [] ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+
+        Right ->
+            section
+                [ class "hero is-medium is-info" ]
+                [ div [ class "hero-head" ] [ a [ name "about" ] [] ]
+                , div [ class "hero-body" ]
+                    [ div [ class "container" ]
+                        [ div [ class "columns" ]
+                            [ div [ class "box column is-5" ]
+                                [ figure [ class "image is-16by9" ] [ img [ src "http://placehold.it/640x360" ] [] ] ]
+                            , div [ class "column is-6 is-offset-1" ]
+                                [ h3 [ class "title" ]
+                                    [ text title_ ]
+                                , hr [] []
+                                , content_
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
 
 
 inputCons : String -> String -> String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
