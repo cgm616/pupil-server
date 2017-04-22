@@ -8,6 +8,7 @@ import Json.Decode
 import Json.Encode
 import String
 import Navigation
+import Validate exposing (..)
 
 
 main =
@@ -27,6 +28,7 @@ type alias Model =
     , name : String
     , notice : Maybe String
     , loading : Bool
+    , validation : Validation
     }
 
 
@@ -38,14 +40,95 @@ type ViewOption
     | LoggedIn
 
 
+type alias Validation =
+    { name : Maybe Bool
+    , email : Maybe Bool
+    , username : Maybe Bool
+    , password : Maybe Bool
+    , verifyPassword : Maybe Bool
+    }
+
+
+type Field
+    = Name
+    | Email
+    | Username
+    | Password
+    | VerifyPassword
+
+
 empty : Model
 empty =
-    Model Button "" "" "" "" "" Nothing False
+    Model
+        Button
+        ""
+        ""
+        ""
+        ""
+        ""
+        Nothing
+        False
+        emptyValidation
+
+
+emptyValidation =
+    Validation Nothing Nothing Nothing Nothing Nothing
 
 
 init : ( Model, Cmd Msg )
 init =
     ( empty, Cmd.none )
+
+
+validateModel : Model -> ( Model, List Field )
+validateModel model =
+    let
+        list =
+            (Validate.all
+                [ .name >> ifBlank Name
+                , .email >> ifInvalidEmail Email
+                , .username >> ifBlank Username
+                , .password >> ifBlank Password
+                ]
+                model
+            )
+                ++ (if model.verifyPassword == model.password then
+                        []
+                    else
+                        [ VerifyPassword ]
+                   )
+    in
+        ( { model
+            | validation =
+                Validation
+                    (if List.member Name list then
+                        Just False
+                     else
+                        Just True
+                    )
+                    (if List.member Email list then
+                        Just False
+                     else
+                        Just True
+                    )
+                    (if List.member Username list then
+                        Just False
+                     else
+                        Nothing
+                    )
+                    (if List.member Password list then
+                        Just False
+                     else
+                        Just True
+                    )
+                    (if List.member VerifyPassword list then
+                        Just False
+                     else
+                        Just True
+                    )
+          }
+        , list
+        )
 
 
 
@@ -74,18 +157,46 @@ update msg model =
             ( { model | name = newName }, Cmd.none )
 
         Submit ->
-            ( { model | loading = True }
-            , (case model.currentView of
+            case model.currentView of
                 Existing ->
-                    submitLogin model
+                    let
+                        tuple =
+                            validateModel model
+                    in
+                        if
+                            tuple
+                                |> Tuple.second
+                                |> List.filter (\n -> ((n == Username) || (n == Password)))
+                                |> List.isEmpty
+                        then
+                            ( { model | loading = True }, submitLogin model )
+                        else
+                            let
+                                newModel =
+                                    Tuple.first tuple
+                            in
+                                ( { newModel | notice = Just "Some required fields are not input correctly." }, Cmd.none )
 
                 Register ->
-                    submitRegister model
+                    let
+                        tuple =
+                            validateModel model
+                    in
+                        if
+                            tuple
+                                |> Tuple.second
+                                |> List.isEmpty
+                        then
+                            ( { model | loading = True }, submitRegister model )
+                        else
+                            let
+                                newModel =
+                                    Tuple.first tuple
+                            in
+                                ( { newModel | notice = Just "Some required fields are not input correctly." }, Cmd.none )
 
                 _ ->
-                    Cmd.none
-              )
-            )
+                    ( { model | loading = True }, Cmd.none )
 
         Response (Ok response) ->
             ( model, Navigation.load response )
@@ -242,9 +353,44 @@ viewChoice model =
 viewExisting model =
     div [ class "animate-fade-in" ]
         [ div [ class "field" ]
-            [ inputCons "text" "Username" "Username" [] model.loading model.username UpdateUsername ]
+            [ inputCons
+                "text"
+                "Username"
+                "Username"
+                []
+                (case model.validation.username of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.username
+                UpdateUsername
+            ]
         , div [ class "field" ]
-            [ inputCons "password" "Password" "Password" [] model.loading model.password UpdatePassword ]
+            [ inputCons "password"
+                "Password"
+                "Password"
+                []
+                (case model.validation.password of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.password
+                UpdatePassword
+            ]
         , div [ class "field is-grouped" ]
             [ buttonCons
                 "Submit"
@@ -271,14 +417,95 @@ viewExisting model =
 viewRegister model =
     div [ class "animate-fade-in" ]
         [ div [ class "field" ]
-            [ inputCons "text" "Full Name" "Full Name" [] model.loading model.name UpdateName ]
-        , div [ class "field is-grouped" ]
-            [ inputCons "text" "Email" "Email" [ "is-expanded" ] model.loading model.email UpdateEmail
-            , inputCons "text" "Username" "Username" [ "is-expanded" ] model.loading model.username UpdateUsername
+            [ inputCons "text"
+                "Full Name"
+                "Full Name"
+                []
+                (case model.validation.name of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.name
+                UpdateName
             ]
         , div [ class "field is-grouped" ]
-            [ inputCons "password" "Password" "Password" [ "is-expanded" ] model.loading model.password UpdatePassword
-            , inputCons "password" "Verify Password" "Verify Password" [ "is-expanded" ] model.loading model.verifyPassword UpdateVerifyPassword
+            [ inputCons "text"
+                "Email"
+                "Email"
+                [ "is-expanded" ]
+                (case model.validation.email of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.email
+                UpdateEmail
+            , inputCons "text"
+                "Username"
+                "Username"
+                [ "is-expanded" ]
+                (case model.validation.username of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.username
+                UpdateUsername
+            ]
+        , div [ class "field is-grouped" ]
+            [ inputCons "password"
+                "Password"
+                "Password"
+                [ "is-expanded" ]
+                (case model.validation.password of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.password
+                UpdatePassword
+            , inputCons "password"
+                "Verify Password"
+                "Verify Password"
+                [ "is-expanded" ]
+                (case model.validation.verifyPassword of
+                    Nothing ->
+                        []
+
+                    Just False ->
+                        [ "is-danger" ]
+
+                    Just True ->
+                        [ "is-success" ]
+                )
+                model.loading
+                model.verifyPassword
+                UpdateVerifyPassword
             ]
         , div [ class "field is-grouped" ]
             [ buttonCons
@@ -366,11 +593,11 @@ viewSection contentSide link_ title_ content_ =
                 ]
 
 
-inputCons : String -> String -> String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
-inputCons kind_ name placeholder_ class_ disabled_ value_ msg =
+inputCons : String -> String -> String -> List String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
+inputCons kind_ name placeholder_ class_ inputClass_ disabled_ value_ msg =
     p [ class ((String.join " " class_) ++ " control") ]
         [ label [ class "label" ] [ text name ]
-        , input [ class "input", type_ kind_, placeholder placeholder_, onInput msg, disabled disabled_, value value_ ] []
+        , input [ class ((String.join " " inputClass_) ++ " input"), type_ kind_, placeholder placeholder_, onInput msg, disabled disabled_, value value_ ] []
         ]
 
 
