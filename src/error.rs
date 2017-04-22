@@ -14,8 +14,15 @@ pub enum Error {
     UserTaken,
     EmailTaken,
     BadUserOrPass,
+    NotConfirmed(ThresholdKind),
     DatabaseError(DieselError),
     PoolError(GetTimeout),
+}
+
+#[derive(Debug)]
+pub enum ThresholdKind {
+    Register,
+    Login,
 }
 
 impl fmt::Display for Error {
@@ -30,6 +37,17 @@ impl error::Error for Error {
             Error::BadUserOrPass => "Username and password don't match.",
             Error::UserTaken => "That username already exists. Please choose another.",
             Error::EmailTaken => "An account with that email already exists.",
+            Error::NotConfirmed(ref kind) => {
+                match *kind {
+                    ThresholdKind::Register => {
+                        "You are successfully registered! Please check your email and click on \
+                         the link we sent to confirm your address."
+                    }
+                    ThresholdKind::Login => {
+                        "Please check your email and confirm your email address before signing in."
+                    }
+                }
+            }
             Error::DatabaseError(_) => "The request failed. Please reload and try again.",
             Error::PoolError(_) => "The request failed. Please reload and try again.",
         }

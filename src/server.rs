@@ -14,7 +14,7 @@ use diesel::prelude::*;
 use diesel::pg::PgConnection;
 
 use super::model::{SafeUser, UserToken, Login, User, NewUser, Register};
-use super::error::Error;
+use super::error::{Error, ThresholdKind};
 use super::passwd;
 use super::database::ConnectionPool;
 
@@ -49,10 +49,14 @@ fn login(cookies: &Cookies,
         .first::<User>(connection.deref())?;
 
     if passwd::verify_password(user.pass.as_str(), data.password.as_str()) {
-        let token = UserToken::new(user.clone())
-            .construct_jwt(env::var("JWT_SECRET").expect("JWT_SECRET not set"));
-        cookies.add(Cookie::new("jwt", token));
-        Ok(JSON(String::from("dash")))
+        if user.conf {
+            let token = UserToken::new(user.clone())
+                .construct_jwt(env::var("JWT_SECRET").expect("JWT_SECRET not set"));
+            cookies.add(Cookie::new("jwt", token));
+            Ok(JSON(String::from("dash")))
+        } else {
+            Err(Error::NotConfirmed(ThresholdKind::Login))
+        }
     } else {
         Err(Error::BadUserOrPass)
     }
@@ -68,17 +72,7 @@ fn register(cookies: &Cookies,
     use super::schema::users;
 
     let connection = pool.0.get()?;
-    let data = data.into_inner(); // TODO: validation, make sure username and email doesn't exist
-
-    /*
-    match users::table.filter(users::username.eq(&data.username))
-        .count()
-        .get_result(connection.deref()) {
-        Ok(0) => {}
-        Ok(_) => return Err(RegisterError::UserTaken),
-        Err(e) => return Err(RegisterError::ServerError),
-    }
-    */
+    let data = data.into_inner();
 
     let secret = env::var("HASH_SECRET").expect("HASH_SECRET not set");
     let secure_pass = passwd::hash_password(data.username.as_str(),
@@ -95,10 +89,9 @@ fn register(cookies: &Cookies,
     diesel::insert(&new_user).into(users::table)
         .execute(connection.deref())?;
 
-    Ok(JSON(String::from("dash")))
+    Err(Error::NotConfirmed(ThresholdKind::Register))
 
     // TODO: send confirmation email
-    // TODO make these errors the right errors
 }
 
 #[get("/logout")]
