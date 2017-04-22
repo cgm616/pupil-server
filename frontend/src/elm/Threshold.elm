@@ -1,6 +1,6 @@
 module Threshold exposing (..)
 
-import Html exposing (Html, button, div, text, p, input, label)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
@@ -136,6 +136,61 @@ type Msg
 
 view : Model -> Html Msg
 view model =
+    div []
+        [ section [ class "hero is-fullheight is-info" ]
+            [ div [ class "hero-head" ]
+                [ div [ class "container" ]
+                    [ nav [ class "nav" ]
+                        [ div [ class "nav-left" ]
+                            [ a [ class "nav-item" ] [ img [ src "/static/img/logo.png" ] [] ] ]
+                        , span [ class "nav-toggle" ] []
+                        , div [ class "nav-right nav-menu" ]
+                            [ a [ class "nav-item", href "#what" ] [ text "What" ]
+                            , a [ class "nav-item", href "#why" ] [ text "Why" ]
+                            , a [ class "nav-item", href "#how" ] [ text "How" ]
+                            , a [ class "nav-item", href "#about" ] [ text "About" ]
+                            , div [ class "nav-item" ] [ viewSplit model ]
+                            ]
+                        ]
+                    ]
+                ]
+            , div [ class "hero-body has-text-centered" ]
+                [ div [ class "container" ]
+                    [ h1 [ class "title is-2" ]
+                        [ text "Learn with "
+                        , strong [] [ text "Pupil" ]
+                        ]
+                    , h3 [ class "title is-2" ]
+                        [ strong [] [ text "Peer tutoring " ]
+                        , text "built to be accessable and useful for "
+                        , strong [] [ text "all" ]
+                        , text "."
+                        ]
+                    ]
+                ]
+            , div [ class "hero-foot has-text-centered" ]
+                [ div [ class "container" ]
+                    [ span [ id "point-down" ] []
+                    , h5 [ class "title is-5" ] [ text "Scroll down" ]
+                    ]
+                ]
+            ]
+        , viewSection Left
+            "What is Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Right
+            "Why use Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Left
+            "How does Pupil work?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        , viewSection Right
+            "Who built Pupil?"
+            (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
+        ]
+
+
+viewSplit model =
     case model.currentView of
         Button ->
             viewButton model
@@ -255,6 +310,56 @@ viewModal function model =
             [ div [ class "box" ] [ function ] ]
         , div [ class "modal-close", onClick (ChangeView Button) ] []
         ]
+
+
+type Side
+    = Left
+    | Right
+
+
+viewSection contentSide title_ content_ =
+    case contentSide of
+        Left ->
+            section
+                [ class "hero is-medium is-dark" ]
+                [ a [ name "how" ] []
+                , div [ class "hero-body" ]
+                    [ div [ class "container" ]
+                        [ div [ class "columns" ]
+                            [ div [ class "column is-6" ]
+                                [ h3 [ class "title" ]
+                                    [ text title_ ]
+                                , hr [] []
+                                , content_
+                                ]
+                            , div [ class "box column is-5 is-offset-1" ]
+                                [ figure [ class "image is-16by9" ]
+                                    [ img [ src "http://placehold.it/640x360" ] [] ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+
+        Right ->
+            section
+                [ class "hero is-medium is-info" ]
+                [ a [ name "about" ] []
+                , div [ class "hero-body" ]
+                    [ div [ class "container" ]
+                        [ div [ class "columns" ]
+                            [ div [ class "box column is-5" ]
+                                [ figure [ class "image is-16by9" ] [ img [ src "http://placehold.it/640x360" ] [] ] ]
+                            , div [ class "column is-6 is-offset-1" ]
+                                [ h3 [ class "title" ]
+                                    [ text title_ ]
+                                , hr [] []
+                                , content_
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
 
 
 inputCons : String -> String -> String -> List String -> Bool -> String -> (String -> Msg) -> Html Msg
