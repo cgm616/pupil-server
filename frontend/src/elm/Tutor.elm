@@ -1,7 +1,5 @@
-module Dash exposing (..)
+module Tutor exposing (..)
 
-import Student
-import Tutor
 import Html exposing (Html, button, div, text, p, input, label)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
@@ -20,21 +18,16 @@ main =
 
 
 type alias Model =
-    { currentView : ViewOption
-    , studentModel : Student.Model
-    , tutorModel : Tutor.Model
-    }
+    { currentView : ViewOption }
 
 
 type ViewOption
-    = StudentView Student.Model
-    | TutorView Tutor.Model
-    | Choice
+    = Choice
 
 
 empty : Model
 empty =
-    Model Choice Student.empty Tutor.empty
+    Model Choice
 
 
 init : ( Model, Cmd Msg )
@@ -63,8 +56,7 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [ class "coolstuff" ]
-        [ p [] [ text "Hi!" ] ]
+    div [] []
 
 
 
