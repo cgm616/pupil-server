@@ -24,14 +24,19 @@ fn index() -> io::Result<NamedFile> {
 }
 
 #[get("/dash")]
-fn dash(user: SafeUser) -> io::Result<NamedFile> {
-    NamedFile::open("static/dash.html")
-}
-
-#[get("/dash")]
-fn dash_redirect(cookies: &Cookies) -> Redirect {
-    cookies.remove("jwt");
-    Redirect::to("/login")
+fn dash(user: Result<SafeUser, Error>,
+        cookies: &Cookies)
+        -> Result<io::Result<NamedFile>, Redirect> {
+    match user {
+        Ok(user) => {
+            if user.conf {
+                Ok(NamedFile::open("static/dash.html"))
+            } else {
+                Err(Redirect::to("/"))
+            }
+        }
+        Err(err) => Err(Redirect::to("/")),
+    }
 }
 
 #[post("/login", format = "application/json", data = "<data>")]

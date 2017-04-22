@@ -10,7 +10,6 @@ extern crate serde_json;
 #[macro_use]
 extern crate serde_derive;
 extern crate jsonwebtoken as jwt;
-extern crate rustc_serialize;
 extern crate time;
 extern crate argon2rs;
 extern crate rand;
@@ -39,7 +38,6 @@ fn main() {
         .mount("/",
                routes![server::index,
                        server::dash,
-                       server::dash_redirect,
                        server::login,
                        server::register,
                        server::logout,
