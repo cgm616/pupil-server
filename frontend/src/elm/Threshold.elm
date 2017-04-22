@@ -176,15 +176,19 @@ view model =
                 ]
             ]
         , viewSection Left
+            "what"
             "What is Pupil?"
             (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
         , viewSection Right
+            "why"
             "Why use Pupil?"
             (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
         , viewSection Left
+            "how"
             "How does Pupil work?"
             (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
         , viewSection Right
+            "about"
             "Who built Pupil?"
             (p [] [ text "Pupil is a new way to augment learning outside of a classroom environment." ])
         ]
@@ -317,12 +321,12 @@ type Side
     | Right
 
 
-viewSection contentSide title_ content_ =
+viewSection contentSide link_ title_ content_ =
     case contentSide of
         Left ->
             section
                 [ class "hero is-medium is-dark" ]
-                [ a [ name "how" ] []
+                [ a [ name link_ ] []
                 , div [ class "hero-body" ]
                     [ div [ class "container" ]
                         [ div [ class "columns" ]
@@ -344,7 +348,7 @@ viewSection contentSide title_ content_ =
         Right ->
             section
                 [ class "hero is-medium is-info" ]
-                [ a [ name "about" ] []
+                [ a [ name link_ ] []
                 , div [ class "hero-body" ]
                     [ div [ class "container" ]
                         [ div [ class "columns" ]
