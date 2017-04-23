@@ -144,3 +144,38 @@ impl UserToken {
         encode(&Header::default(), self, secret.as_bytes()).unwrap() // TODO error handling
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_jwt() {
+        let issued_at = 1492907635;
+        let expired = 1492907695;
+        let name = String::from("John Smith");
+        let email = String::from("jsmith@website.com");
+        let username = String::from("jsmith");
+        let pass = String::from("hashed_password");
+        let conf = true;
+
+        let mut claims = UserToken::new(User {
+            id: 1,
+            name: name,
+            email: email,
+            username: username,
+            pass: pass,
+            conf: conf,
+        });
+
+        claims.iat = issued_at;
+        claims.exp = expired;
+
+        let encoded = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE0OTI5MDc2MzUsImV4cCI6MTQ5Mj\
+            kwNzY5NSwiaXNzIjoicHVwaWwiLCJpZCI6MSwibmFtZSI6IkpvaG4gU21pdGgiLCJlbWFpbCI6ImpzbWl0aEB3\
+            ZWJzaXRlLmNvbSIsInVzZXJuYW1lIjoianNtaXRoIiwiY29uZiI6dHJ1ZX0.655jzhRXSF05RJyACAWv_tuT9p\
+            MMVyIyMh4Icb6EKOI";
+
+        assert_eq!(claims.construct_jwt(String::from("secret")), encoded);
+    }
+}
