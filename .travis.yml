@@ -2,7 +2,11 @@ language: rust
 sudo: required
 services:
   - postgresql
-cache: cargo
+cache:
+  - cargo
+  directories:
+    - frontend/elm-stuff
+    - frontend/node_modules
 rust:
   - nightly
 node_js:
