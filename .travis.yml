@@ -5,6 +5,8 @@ services:
 cache: cargo
 rust:
   - nightly
+node_js:
+  - "node"
 git:
   depth: 5
 branches:
@@ -14,7 +16,19 @@ notifications:
   email:
     on_success: change
     on_failure: change
+env:
+  - RUST_TEST_THREADS=1
+before_install:
+  - nvm install 7.9.0
+  - nvm use 7.9.0
 before_script:
   - mv .travis.env .env
   - source .env
   - psql -c 'create database travis_ci_test;' -U postgres
+  - cd frontend/ && npm run reinstall
+script:
+  - cd frontend/
+  - npm run build
+  - cd ../
+  - cargo build --verbose
+  - cargo test --verbose
