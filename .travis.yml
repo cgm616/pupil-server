@@ -16,6 +16,7 @@ git:
 branches:
   only:
   - master
+  - frontend
 notifications:
   email:
     on_success: change
