@@ -15,8 +15,7 @@ use time;
 
 use super::error::Error;
 
-#[derive(Queryable)]
-#[derive(Clone)]
+#[derive(Queryable, Clone, Debug)]
 pub struct User {
     pub id: i32,
     pub name: String,
@@ -26,6 +25,7 @@ pub struct User {
     pub conf: bool,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct SafeUser {
     pub id: i32,
     pub name: String,

@@ -1,5 +1,7 @@
 language: rust
 sudo: required
+services:
+  - postgresql
 cache: cargo
 rust:
   - nightly
@@ -12,12 +14,8 @@ notifications:
   email:
     on_success: change
     on_failure: change
-
-services:
-  - postgresql
 before_script:
   - mv .travis.env .env
   - source .env
   - cargo install diesel_cli
   - psql -c 'create database travis_ci_test;' -U postgres
-  - diesel migration run

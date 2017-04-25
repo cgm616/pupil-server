@@ -9,6 +9,8 @@ use rocket::http::{ContentType, Status};
 
 use r2d2::GetTimeout;
 
+use serde_json;
+
 #[derive(Debug)]
 pub enum Error {
     UserTaken,
@@ -62,10 +64,13 @@ impl error::Error for Error {
 
 impl<'a> Responder<'a> for Error {
     fn respond(self) -> Result<Response<'a>, Status> {
+        let body = io::Cursor::new(serde_json::to_string(self.description())
+            .unwrap_or(String::from("The request failed. Please reload and try again.")));
+
         Ok(Response::build()
             .status(Status::BadRequest)
-            .header(ContentType::Plain) // change to JSON?
-            .sized_body(io::Cursor::new(String::from(self.description())))
+            .header(ContentType::JSON)
+            .sized_body(body)
             .finalize())
     }
 }
