@@ -77,6 +77,7 @@ impl<'a> Responder<'a> for Error {
 
 impl From<DieselError> for Error {
     fn from(err: DieselError) -> Self {
+        println!("{:?}", err);
         match err {
             DieselError::NotFound => Error::BadUserOrPass,
             DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, info) => {
