@@ -1,17 +1,12 @@
 module Tutor exposing (..)
 
-import Html exposing (Html, button, div, text, p, input, label)
+import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (..)
 import Http
 import Json.Decode
 import Json.Encode
 import String
-
-
-main =
-    Html.program { init = init, subscriptions = subscriptions, view = view, update = update }
-
 
 
 -- MODEL
@@ -56,7 +51,22 @@ type Msg
 
 view : Model -> Html Msg
 view model =
-    div [] []
+    div []
+        [ section
+            [ class "hero is-info" ]
+            [ div [ class "hero-body" ]
+                [ div [ class "container" ]
+                    [ h1 [ class "title is-1" ]
+                        [ text "Welcome! You are currently a"
+                        , strong [] [ text "Tutor" ]
+                        ]
+                    , h3 [ class "subtitle is-3" ]
+                        [ text "Get started teaching today!"
+                        ]
+                    ]
+                ]
+            ]
+        ]
 
 
 
