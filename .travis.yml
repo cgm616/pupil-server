@@ -31,6 +31,7 @@ before_script:
   - source .env
   - psql -c 'create database travis_ci_test;' -U postgres
   - cd frontend/ && npm run reinstall
+  - cd ../
 script:
   - cd frontend/
   - npm run build
