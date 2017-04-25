@@ -53,15 +53,27 @@ view : Model -> Html Msg
 view model =
     div []
         [ section
-            [ class "hero is-info" ]
+            [ class "hero is-dark" ]
             [ div [ class "hero-body" ]
                 [ div [ class "container" ]
                     [ h1 [ class "title is-1" ]
-                        [ text "Welcome! You are currently a"
+                        [ text "Welcome! You are currently a "
                         , strong [] [ text "Tutor" ]
                         ]
                     , h3 [ class "subtitle is-3" ]
                         [ text "Get started teaching today!"
+                        ]
+                    ]
+                ]
+            , div [ class "hero-foot" ]
+                [ div [ class "container" ]
+                    [ nav [ class "tabs is-boxed" ]
+                        [ ul []
+                            [ li [] [ a [] [ text "Available Appointments" ] ]
+                            , li [] [ a [] [ text "Your Appointments" ] ]
+                            , li [] [ a [] [ text "Profile" ] ]
+                            , li [] [ a [] [ text "Settings" ] ]
+                            ]
                         ]
                     ]
                 ]

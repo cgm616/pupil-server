@@ -53,7 +53,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ section
-            [ class "hero is-info" ]
+            [ class "hero is-dark" ]
             [ div [ class "hero-body" ]
                 [ div [ class "container" ]
                     [ h1 [ class "title is-1" ]
@@ -67,10 +67,10 @@ view model =
                 [ div [ class "container" ]
                     [ div [ class "tabs is-boxed" ]
                         [ ul []
-                            [ li [] [ a [] [ text " Create Appointment " ] ]
-                            , li [] [ a [] [ text " Your Appointments " ] ]
-                            , li [] [ a [] [ text " Profile " ] ]
-                            , li [] [ a [] [ text " Settings " ] ]
+                            [ li [] [ a [] [ text "Create Appointment" ] ]
+                            , li [] [ a [] [ text "Your Appointments" ] ]
+                            , li [] [ a [] [ text "Profile" ] ]
+                            , li [] [ a [] [ text "Settings" ] ]
                             ]
                         ]
                     ]
