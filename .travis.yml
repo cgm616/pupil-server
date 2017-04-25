@@ -23,6 +23,7 @@ notifications:
     on_failure: change
 env:
   - RUST_TEST_THREADS=1
+  - RUST_BACKTRACE=1
 before_install:
   - nvm install 7.9.0
   - nvm use 7.9.0
