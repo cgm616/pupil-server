@@ -97,10 +97,10 @@ view model =
                                     [ class "field is-grouped", style [ ( " margin-bottom", "0" ) ] ]
                                     [ (case model.currentView of
                                         StudentView ->
-                                            buttonCons "Switch to Tutor" [ "is-info" ] False (ChangeView TutorView)
+                                            buttonCons "Switch to Tutor" [ "is-primary" ] False (ChangeView TutorView)
 
                                         TutorView ->
-                                            buttonCons "Switch to Student" [ "is-info" ] False (ChangeView StudentView)
+                                            buttonCons "Switch to Student" [ "is-primary" ] False (ChangeView StudentView)
 
                                         Choice ->
                                             div [] []
