@@ -3,7 +3,7 @@ sudo: required
 services:
   - postgresql
 cache:
-  - cargo
+  cargo: true
   directories:
     - frontend/elm-stuff
     - frontend/node_modules
