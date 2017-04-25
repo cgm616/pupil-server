@@ -65,7 +65,7 @@ impl error::Error for Error {
 impl<'a> Responder<'a> for Error {
     fn respond(self) -> Result<Response<'a>, Status> {
         let body = io::Cursor::new(serde_json::to_string(self.description())
-            .unwrap_or(String::from("The request failed. Please reload and try again.")));
+            .unwrap_or(String::from("The request failed. Please reload and try again. uh oh")));
 
         Ok(Response::build()
             .status(Status::BadRequest)
@@ -85,6 +85,7 @@ impl From<DieselError> for Error {
                     Some("users_email_key") => Error::EmailTaken,
                     Some("users_username_key") => Error::UserTaken,
                     _ => {
+                        println!("no recognizable constraint!");
                         Error::DatabaseError(DieselError::DatabaseError(
                             DatabaseErrorKind::UniqueViolation, info))
                     }
