@@ -17,5 +17,4 @@ notifications:
 before_script:
   - mv .travis.env .env
   - source .env
-  - cargo install diesel_cli
   - psql -c 'create database travis_ci_test;' -U postgres
