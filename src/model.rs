@@ -63,9 +63,10 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
     type Error = Error;
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<SafeUser, Error> {
-        let cookies = request.cookies();
-        let cookie = match cookies.find("jwt") {
-            Some(cookie) => cookie,
+        let mut cookies = request.cookies();
+
+        let cookie = match cookies.get("jwt") {
+            Some(cookie) => cookie.to_owned(),
             None => return Outcome::Failure((Status::NotFound, Error::BadCookie)),
         };
 
@@ -73,13 +74,10 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
 
         let secret = env::var("JWT_SECRET").expect("JWT_SECRET not set"); // TODO: better errors
 
-        match decode::<UserToken>(&cookie.value(),
-                                  secret.as_bytes(),
-                                  Algorithm::HS256,
-                                  &validation) {
+        match decode::<UserToken>(&cookie.value(), secret.as_bytes(), &validation) {
             Ok(token) => Outcome::Success(SafeUser::from(token.claims)),
-            Err(e) => {
-                cookies.remove("jwt");
+            Err(_) => {
+                cookies.remove(Cookie::new("jwt", "invalidtoken"));
                 Outcome::Failure((Status::NotFound, Error::BadCookie))
             }
         }

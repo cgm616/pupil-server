@@ -25,7 +25,7 @@ fn index() -> io::Result<NamedFile> {
 
 #[get("/dash")]
 fn dash(user: Result<SafeUser, Error>,
-        cookies: &Cookies)
+        cookies: Cookies)
         -> Result<io::Result<NamedFile>, Redirect> {
     match user {
         Ok(user) => {
@@ -40,7 +40,7 @@ fn dash(user: Result<SafeUser, Error>,
 }
 
 #[post("/login", format = "application/json", data = "<data>")]
-fn login(cookies: &Cookies,
+fn login(mut cookies: Cookies,
          data: JSON<Login>,
          pool: State<ConnectionPool>)
          -> Result<JSON<String>, Error> {
@@ -70,10 +70,7 @@ fn login(cookies: &Cookies,
 }
 
 #[post("/register", format = "application/json", data = "<data>")]
-fn register(cookies: &Cookies,
-            data: JSON<Register>,
-            pool: State<ConnectionPool>)
-            -> Result<JSON<String>, Error> {
+fn register(data: JSON<Register>, pool: State<ConnectionPool>) -> Result<JSON<String>, Error> {
     use super::schema::users;
 
     let connection = pool.0.get()?;
@@ -100,8 +97,8 @@ fn register(cookies: &Cookies,
 }
 
 #[get("/logout")]
-fn logout(cookies: &Cookies) -> Redirect {
-    cookies.remove("jwt");
+fn logout(mut cookies: Cookies) -> Redirect {
+    cookies.remove(Cookie::new("jwt", "invalidtoken"));
     Redirect::to("/")
 }
 
