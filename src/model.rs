@@ -15,8 +15,7 @@ use time;
 
 use super::error::Error;
 
-#[derive(Queryable)]
-#[derive(Clone)]
+#[derive(Queryable, Clone, Debug)]
 pub struct User {
     pub id: i32,
     pub name: String,
@@ -26,6 +25,7 @@ pub struct User {
     pub conf: bool,
 }
 
+#[derive(Debug, PartialEq)]
 pub struct SafeUser {
     pub id: i32,
     pub name: String,
@@ -63,9 +63,10 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
     type Error = Error;
 
     fn from_request(request: &'a Request<'r>) -> request::Outcome<SafeUser, Error> {
-        let cookies = request.cookies();
-        let cookie = match cookies.find("jwt") {
-            Some(cookie) => cookie,
+        let mut cookies = request.cookies();
+
+        let cookie = match cookies.get("jwt") {
+            Some(cookie) => cookie.to_owned(),
             None => return Outcome::Failure((Status::NotFound, Error::BadCookie)),
         };
 
@@ -73,13 +74,10 @@ impl<'a, 'r> request::FromRequest<'a, 'r> for SafeUser {
 
         let secret = env::var("JWT_SECRET").expect("JWT_SECRET not set"); // TODO: better errors
 
-        match decode::<UserToken>(&cookie.value(),
-                                  secret.as_bytes(),
-                                  Algorithm::HS256,
-                                  &validation) {
+        match decode::<UserToken>(&cookie.value(), secret.as_bytes(), &validation) {
             Ok(token) => Outcome::Success(SafeUser::from(token.claims)),
-            Err(e) => {
-                cookies.remove("jwt");
+            Err(_) => {
+                cookies.remove(Cookie::new("jwt", "invalidtoken"));
                 Outcome::Failure((Status::NotFound, Error::BadCookie))
             }
         }
@@ -142,5 +140,40 @@ impl UserToken {
 
     pub fn construct_jwt(&self, secret: String) -> String {
         encode(&Header::default(), self, secret.as_bytes()).unwrap() // TODO error handling
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn encode_jwt() {
+        let issued_at = 1492907635;
+        let expired = 1492907695;
+        let name = String::from("John Smith");
+        let email = String::from("jsmith@website.com");
+        let username = String::from("jsmith");
+        let pass = String::from("hashed_password");
+        let conf = true;
+
+        let mut claims = UserToken::new(User {
+            id: 1,
+            name: name,
+            email: email,
+            username: username,
+            pass: pass,
+            conf: conf,
+        });
+
+        claims.iat = issued_at;
+        claims.exp = expired;
+
+        let encoded = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpYXQiOjE0OTI5MDc2MzUsImV4cCI6MTQ5Mj\
+            kwNzY5NSwiaXNzIjoicHVwaWwiLCJpZCI6MSwibmFtZSI6IkpvaG4gU21pdGgiLCJlbWFpbCI6ImpzbWl0aEB3\
+            ZWJzaXRlLmNvbSIsInVzZXJuYW1lIjoianNtaXRoIiwiY29uZiI6dHJ1ZX0.655jzhRXSF05RJyACAWv_tuT9p\
+            MMVyIyMh4Icb6EKOI";
+
+        assert_eq!(claims.construct_jwt(String::from("secret")), encoded);
     }
 }
