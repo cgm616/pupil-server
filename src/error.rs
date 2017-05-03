@@ -81,20 +81,14 @@ impl From<DieselError> for Error {
         match err {
             DieselError::NotFound => Error::BadUserOrPass,
             DieselError::DatabaseError(DatabaseErrorKind::UniqueViolation, info) => {
-                println!("constraint is {:?}", info.constraint_name());
-                println!("message is {}", info.message());
-                println!("column name is {:?}", info.column_name());
-                match info.constraint_name() {
-                    Some("users_email_key") => Error::EmailTaken,
-                    Some("users_username_key") => Error::UserTaken,
-                    Some(constraint) => {
-                        println!("constraint is: {}", constraint);
-                        Error::DatabaseError(DieselError::NotFound) // this is NOT good
-                    }
-                    _ => {
-                        println!("no recognizable constraint!");
-                        Error::DatabaseError(DieselError::NotFound) // entirely wrong but need
-                    }
+                let message = info.message().to_owned();
+                if message.contains("users_email_key") {
+                    Error::EmailTaken
+                } else if message.contains("users_username_key") {
+                    Error::UserTaken
+                } else {
+                    Error::DatabaseError(DieselError::DatabaseError(
+                        DatabaseErrorKind::UniqueViolation, info))
                 }
             }
             _ => Error::DatabaseError(err),
