@@ -84,10 +84,13 @@ impl From<DieselError> for Error {
                 match info.constraint_name() {
                     Some("users_email_key") => Error::EmailTaken,
                     Some("users_username_key") => Error::UserTaken,
+                    Some(constraint) => {
+                        println!("constraint is: {}", constraint);
+                        Error::DatabaseError(DieselError::NotFound) // this is NOT good
+                    }
                     _ => {
                         println!("no recognizable constraint!");
-                        Error::DatabaseError(DieselError::DatabaseError(
-                            DatabaseErrorKind::UniqueViolation, info))
+                        Error::DatabaseError(DieselError::NotFound) // entirely wrong but need
                     }
                 }
             }
