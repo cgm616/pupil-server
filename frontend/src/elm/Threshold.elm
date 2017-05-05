@@ -88,10 +88,14 @@ validateModel model =
                 [ .name >> ifBlank Name
                 , .email >> ifInvalidEmail Email
                 , .username >> ifBlank Username
-                , .password >> ifBlank Password
                 ]
                 model
             )
+                ++ (if String.length model.password < 9 then
+                        [ Password, VerifyPassword ]
+                    else
+                        []
+                   )
                 ++ (if model.verifyPassword == model.password then
                         []
                     else
