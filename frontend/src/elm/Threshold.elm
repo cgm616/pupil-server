@@ -41,11 +41,11 @@ type ViewOption
 
 
 type alias Validation =
-    { name : Maybe Bool
-    , email : Maybe Bool
-    , username : Maybe Bool
-    , password : Maybe Bool
-    , verifyPassword : Maybe Bool
+    { name : Maybe ( Bool, String )
+    , email : Maybe ( Bool, String )
+    , username : Maybe ( Bool, String )
+    , password : Maybe ( Bool, String )
+    , verifyPassword : Maybe ( Bool, String )
     }
 
 
@@ -106,33 +106,71 @@ validateModel model =
             | validation =
                 Validation
                     (if List.member Name list then
-                        Just False
+                        Just ( False, "A name must be given." )
                      else
-                        Just True
+                        Just ( True, "" )
                     )
                     (if List.member Email list then
-                        Just False
+                        Just ( False, "A valid email must be given." )
                      else
-                        Just True
+                        Just ( True, "" )
                     )
                     (if List.member Username list then
-                        Just False
+                        Just ( False, "A username must be given." )
                      else
                         Nothing
                     )
                     (if List.member Password list then
-                        Just False
+                        Just ( False, "A password longer than 8 characters must be given." )
                      else
-                        Just True
+                        Just ( True, "" )
                     )
                     (if List.member VerifyPassword list then
-                        Just False
+                        Just ( False, "The password verification does not match." )
                      else
-                        Just True
+                        Just ( True, "" )
                     )
           }
         , list
         )
+
+
+noticeGen : Validation -> ViewOption -> Maybe String
+noticeGen { name, email, username, password, verifyPassword } currentView =
+    case currentView of
+        Existing ->
+            Just
+                (String.join
+                    " "
+                    [ Tuple.second (maybeDestruct username)
+                    , Tuple.second (maybeDestruct password)
+                    ]
+                )
+
+        Register ->
+            Just
+                (String.join
+                    " "
+                    [ Tuple.second (maybeDestruct name)
+                    , Tuple.second (maybeDestruct email)
+                    , Tuple.second (maybeDestruct username)
+                    , Tuple.second (maybeDestruct password)
+                    , Tuple.second (maybeDestruct verifyPassword)
+                    ]
+                )
+
+        _ ->
+            Just ""
+
+
+maybeDestruct : Maybe ( Bool, String ) -> ( Bool, String )
+maybeDestruct choice =
+    case choice of
+        Nothing ->
+            ( False, "" )
+
+        Just something ->
+            something
 
 
 
@@ -173,13 +211,13 @@ update msg model =
                                 |> List.filter (\n -> ((n == Username) || (n == Password)))
                                 |> List.isEmpty
                         then
-                            ( { model | loading = True }, submitLogin model )
+                            ( { model | loading = True, notice = Nothing }, submitLogin model )
                         else
                             let
                                 newModel =
                                     Tuple.first tuple
                             in
-                                ( { newModel | notice = Just "Some required fields are not input correctly." }, Cmd.none )
+                                ( { newModel | notice = noticeGen newModel.validation newModel.currentView }, Cmd.none )
 
                 Register ->
                     let
@@ -191,13 +229,13 @@ update msg model =
                                 |> Tuple.second
                                 |> List.isEmpty
                         then
-                            ( { model | loading = True }, submitRegister model )
+                            ( { model | loading = True, notice = Nothing }, submitRegister model )
                         else
                             let
                                 newModel =
                                     Tuple.first tuple
                             in
-                                ( { newModel | notice = Just "Some required fields are not input correctly." }, Cmd.none )
+                                ( { newModel | notice = noticeGen newModel.validation newModel.currentView }, Cmd.none )
 
                 _ ->
                     ( { model | loading = True }, Cmd.none )
@@ -366,10 +404,10 @@ viewExisting model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -385,10 +423,10 @@ viewExisting model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -429,10 +467,10 @@ viewRegister model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -448,10 +486,10 @@ viewRegister model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -465,10 +503,10 @@ viewRegister model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -484,10 +522,10 @@ viewRegister model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
@@ -501,10 +539,10 @@ viewRegister model =
                     Nothing ->
                         []
 
-                    Just False ->
+                    Just ( False, _ ) ->
                         [ "is-danger" ]
 
-                    Just True ->
+                    Just ( True, _ ) ->
                         [ "is-success" ]
                 )
                 model.loading
