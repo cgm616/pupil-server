@@ -56,7 +56,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ section
-            [ class "hero is-dark" ]
+            [ class "hero is-info" ]
             [ div [ class "hero-body" ]
                 [ div [ class "container" ]
                     [ h1 [ class "title is-1" ]
