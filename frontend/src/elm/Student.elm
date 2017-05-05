@@ -17,12 +17,15 @@ type alias Model =
 
 
 type ViewOption
-    = Choice
+    = Create
+    | Existing
+    | Profile
+    | Settings
 
 
 empty : Model
 empty =
-    Model Choice
+    Model Existing
 
 
 init : ( Model, Cmd Msg )
@@ -67,16 +70,49 @@ view model =
                 [ div [ class "container" ]
                     [ div [ class "tabs is-boxed" ]
                         [ ul []
-                            [ li [] [ a [] [ text "Create Appointment" ] ]
-                            , li [] [ a [] [ text "Your Appointments" ] ]
-                            , li [] [ a [] [ text "Profile" ] ]
-                            , li [] [ a [] [ text "Settings" ] ]
+                            [ li [] [ a [ onClick (ChangeView Create) ] [ text "Create Appointment" ] ]
+                            , li [] [ a [ onClick (ChangeView Existing) ] [ text "Your Appointments" ] ]
+                            , li [] [ a [ onClick (ChangeView Profile) ] [ text "Profile" ] ]
+                            , li [] [ a [ onClick (ChangeView Settings) ] [ text "Settings" ] ]
                             ]
                         ]
                     ]
                 ]
             ]
+        , (case model.currentView of
+            Create ->
+                create model
+
+            Existing ->
+                existing model
+
+            Profile ->
+                profile model
+
+            Settings ->
+                settings model
+          )
         ]
+
+
+create : Model -> Html Msg
+create model =
+    div [] []
+
+
+existing : Model -> Html Msg
+existing model =
+    div [] []
+
+
+profile : Model -> Html Msg
+profile model =
+    div [] []
+
+
+settings : Model -> Html Msg
+settings model =
+    div [] []
 
 
 
