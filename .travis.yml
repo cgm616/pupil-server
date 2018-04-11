@@ -8,6 +8,7 @@ cache:
     - frontend/elm-stuff
     - frontend/node_modules
 rust:
+  - nightly-2017-12-21
   - nightly
 node_js:
   - "node"
@@ -15,15 +16,12 @@ git:
   depth: 5
 branches:
   only:
-  - master
-  - frontend
-notifications:
-  email:
-    on_success: change
-    on_failure: change
+    - master
+matrix:
+  allow_failures:
+    - rust: nightly
 env:
   global:
-    - RUST_TEST_THREADS=1
     - RUST_BACKTRACE=1
 before_install:
   - nvm install 7.9.0
@@ -39,4 +37,4 @@ script:
   - npm run build
   - cd ../
   - cargo build --verbose
-  - cargo test --verbose
+  - cargo test --verbose -- --test-threads 1

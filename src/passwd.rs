@@ -2,7 +2,7 @@ use argon2rs::verifier::Encoded;
 use argon2rs::{Argon2, Variant};
 use rand::{thread_rng, Rng};
 
-const SALT_LENGTH: usize = 64;
+pub const SALT_LENGTH: usize = 64;
 
 pub fn hash_password(username: &str, pass: &str, secret: &str) -> String {
     // uses recommendations from https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
@@ -10,17 +10,21 @@ pub fn hash_password(username: &str, pass: &str, secret: &str) -> String {
     let mut salt_array = [0u8; SALT_LENGTH];
     thread_rng().fill_bytes(&mut salt_array);
     let hasher = Argon2::new(10, 1, 4096, Variant::Argon2i).unwrap();
-    String::from_utf8(Encoded::new(hasher,
-                                   pass.as_bytes(),
-                                   &salt_array,
-                                   secret.as_bytes(),
-                                   username.as_bytes())
-            .to_u8())
-        .unwrap() // TODO: error stuff!!!
+    String::from_utf8(
+        Encoded::new(
+            hasher,
+            pass.as_bytes(),
+            &salt_array,
+            secret.as_bytes(),
+            username.as_bytes(),
+        ).to_u8(),
+    ).unwrap() // TODO: error stuff!!!
 }
 
 pub fn verify_password(hash: &str, pass: &str) -> bool {
-    Encoded::from_u8(hash.as_bytes()).unwrap().verify(pass.as_bytes())
+    Encoded::from_u8(hash.as_bytes())
+        .unwrap()
+        .verify(pass.as_bytes())
 }
 
 #[cfg(test)]

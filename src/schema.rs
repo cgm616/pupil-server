@@ -8,3 +8,14 @@ table! {
         conf -> Bool,
     }
 }
+
+table! {
+    conf {
+        id -> Integer,
+        created -> Timestamptz,
+        userid -> Integer,
+        username -> VarChar,
+        link -> VarChar,
+        reset -> Bool,
+    }
+}
